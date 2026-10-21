@@ -10,7 +10,7 @@ services:
   # 1A. WEB FRONTEND SERVER 1 (Chính - Có alias web-frontend-server1 cho Load Balancing)
   web-frontend-server:
     build: ./web-frontend-server
-    image: nhom01minicloud/web:dev
+    image: nhom13minicloud/web:dev
     container_name: web-frontend-server
     ports:
       - "8080:80"
@@ -22,7 +22,7 @@ services:
 
   # 1B. WEB FRONTEND SERVER 2 (Bản sao - Phục vụ Mở rộng 10: Load Balancing Round Robin)
   web-frontend-server2:
-    image: nhom01minicloud/web:dev
+    image: nhom13minicloud/web:dev
     container_name: web-frontend-server2
     depends_on:
       - web-frontend-server
@@ -37,12 +37,12 @@ services:
   # 2. APPLICATION BACKEND SERVER
   application-backend-server:
     build: ./application-backend-server
-    image: nhom01minicloud/app:dev
+    image: nhom13minicloud/app:dev
     container_name: application-backend-server
     ports:
       - "8085:8081"
     environment:
-      OIDC_ISSUER: "http://authentication-identity-server:8080/realms/realm_nhom01"
+      OIDC_ISSUER: "http://authentication-identity-server:8080/realms/realm_nhom13"
       OIDC_AUDIENCE: "flask-app"
       DB_HOST: "relational-database-server"
       DB_USER: "root"
