@@ -1,0 +1,168 @@
+networks:
+  cloud-net:
+    name: cloud-net
+
+volumes:
+  mariadb_data:
+  grafana_data:
+
+services:
+  # 1A. WEB FRONTEND SERVER 1 (Chính - Có alias web-frontend-server1 cho Load Balancing)
+  web-frontend-server:
+    build: ./web-frontend-server
+    image: nhom01minicloud/web:dev
+    container_name: web-frontend-server
+    ports:
+      - "8080:80"
+    networks:
+      cloud-net:
+        aliases:
+          - web-frontend-server1
+    restart: unless-stopped
+
+  # 1B. WEB FRONTEND SERVER 2 (Bản sao - Phục vụ Mở rộng 10: Load Balancing Round Robin)
+  web-frontend-server2:
+    image: nhom01minicloud/web:dev
+    container_name: web-frontend-server2
+    depends_on:
+      - web-frontend-server
+    ports:
+      - "8082:80"
+    volumes:
+      - ./web-frontend-server/html/index2.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 2. APPLICATION BACKEND SERVER
+  application-backend-server:
+    build: ./application-backend-server
+    image: nhom01minicloud/app:dev
+    container_name: application-backend-server
+    ports:
+      - "8085:8081"
+    environment:
+      OIDC_ISSUER: "http://authentication-identity-server:8080/realms/realm_nhom01"
+      OIDC_AUDIENCE: "flask-app"
+      DB_HOST: "relational-database-server"
+      DB_USER: "root"
+      DB_PASSWORD: "root"
+      DB_NAME: "studentdb"
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 3. RELATIONAL DATABASE SERVER
+  relational-database-server:
+    image: mariadb:11
+    container_name: relational-database-server
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: minicloud
+    volumes:
+      - ./relational-database-server/init:/docker-entrypoint-initdb.d:ro
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 4. AUTHENTICATION IDENTITY SERVER
+  authentication-identity-server:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: authentication-identity-server
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8081:8080"
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 5. OBJECT STORAGE SERVER
+  object-storage-server:
+    image: minio/minio
+    container_name: object-storage-server
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./object-storage-server/data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 6. INTERNAL DNS SERVER
+  internal-dns-server:
+    image: internetsystemsconsortium/bind9:9.18
+    container_name: internal-dns-server
+    ports:
+      - "1053:53/udp"
+    volumes:
+      - ./internal-dns-server/named.conf.options:/etc/bind/named.conf.options:ro
+      - ./internal-dns-server/named.conf.local:/etc/bind/named.conf.local:ro
+      - ./internal-dns-server/db.cloud.local:/etc/bind/db.cloud.local:ro
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 7. MONITORING NODE EXPORTER (Helper container)
+  monitoring-node-exporter-server:
+    image: prom/node-exporter:latest
+    container_name: monitoring-node-exporter-server
+    ports:
+      - "9100:9100"
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 8. MONITORING PROMETHEUS SERVER
+  monitoring-prometheus-server:
+    image: prom/prometheus:latest
+    container_name: monitoring-prometheus-server
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring-prometheus-server/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 9. MONITORING GRAFANA DASHBOARD SERVER
+  monitoring-grafana-dashboard-server:
+    image: grafana/grafana:latest
+    container_name: monitoring-grafana-dashboard-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - cloud-net
+    restart: unless-stopped
+
+  # 10. API GATEWAY PROXY SERVER
+  api-gateway-proxy-server:
+    image: nginx:stable
+    container_name: api-gateway-proxy-server
+    depends_on:
+      - web-frontend-server
+      - web-frontend-server2
+      - application-backend-server
+      - authentication-identity-server
+    ports:
+      - "80:80"
+    volumes:
+      - ./api-gateway-proxy-server/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - cloud-net
+    restart: unless-stopped
