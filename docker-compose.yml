@@ -86,7 +86,9 @@ services:
 
   # 5. OBJECT STORAGE SERVER
   object-storage-server:
-    image: minio/minio
+    build: ./object-storage-server
+    # Local build from pinned upstream source; see README.md for the naming exception.
+    image: nhom13minicloud/minio:source-7aac2a2c5b7c
     container_name: object-storage-server
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
