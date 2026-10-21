@@ -1,0 +1,31 @@
+server {
+    listen 80;
+    server_name _;
+    charset utf-8;
+    # Keep the caller's host/port when accessed directly or through the gateway.
+    absolute_redirect off;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /blog {
+        return 301 /blog/;
+    }
+
+    location ^~ /blog/ {
+        alias /usr/share/nginx/html/blog/;
+        index index.html;
+        autoindex off;
+    }
+
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+    }
+}

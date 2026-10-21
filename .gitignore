@@ -1,0 +1,14 @@
+object-storage-server/data/*
+!object-storage-server/data/.gitkeep
+.venv/
+__pycache__/
+*.pyc
+artifacts/
+node_modules/
+
+# Web-server - Object server ignore
+README.md
+tests
+package-lock.json
+package.json
+scripts

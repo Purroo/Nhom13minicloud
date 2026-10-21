@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 570" fill="none">
+<defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#d6dfcd"/></pattern><filter id="shadow" x="-40%" y="-40%" width="180%" height="200%"><feGaussianBlur stdDeviation="12"/></filter></defs>
+<circle cx="317" cy="274" r="235" fill="#edf1e4"/><circle cx="317" cy="274" r="234" fill="url(#dots)"/>
+<ellipse cx="319" cy="434" rx="165" ry="47" fill="#aec2a5" opacity=".3" filter="url(#shadow)"/>
+<ellipse cx="317" cy="300" rx="265" ry="103" stroke="#b9cbb1" stroke-dasharray="5 7" transform="rotate(-24 317 300)"/>
+<path d="M176 157c-27 0-42-17-39-36 3-20 21-32 42-31 12-37 69-43 94-16 34-22 78-5 83 29 27-4 49 12 49 33 0 20-17 35-43 35H178" fill="#fff" stroke="#c4d3bd" stroke-width="2"/>
+<path d="M188 162h172" stroke="#d9e3d0" stroke-width="2"/>
+<path d="m151 349 178-101 179 101v54L329 506 151 403Z" fill="#1f6953" stroke="#184d40" stroke-width="2"/>
+<path d="m329 452 179-103v54L329 506Z" fill="#174e40"/>
+<path d="m151 349 178-101 179 101-179 103Z" fill="#a4c17e" stroke="#184d40" stroke-width="2"/>
+<path d="m151 274 178-101 179 101v54L329 431 151 328Z" fill="#689665" stroke="#326a50" stroke-width="2"/>
+<path d="m329 377 179-103v54L329 431Z" fill="#326e54"/>
+<path d="m151 274 178-101 179 101-179 103Z" fill="#d9e9b5" stroke="#326a50" stroke-width="2"/>
+<path d="m151 199 178-101 179 101v54L329 356 151 253Z" fill="#c1d59c" stroke="#5c855a" stroke-width="2"/>
+<path d="m329 302 179-103v54L329 356Z" fill="#81a66c"/>
+<path d="m151 199 178-101 179 101-179 103Z" fill="#f0f5de" stroke="#5c855a" stroke-width="2"/>
+<path d="m205 198 124-70 124 70-124 72Z" stroke="#bbce9f" stroke-width="1.5"/>
+<path d="m242 196 87-49 87 49-87 51Z" fill="#246c51" stroke="#16523d" stroke-width="2"/>
+<path d="m277 195 52-29 52 29-52 30Z" fill="#d9eb9c"/>
+<path d="m289 195 40-22 40 22-40 23Z" stroke="#75a168" stroke-width="1.5"/>
+<g fill="#eff6da"><circle cx="178" cy="234" r="4"/><circle cx="190" cy="241" r="4"/><circle cx="178" cy="309" r="4"/><circle cx="190" cy="316" r="4"/><circle cx="178" cy="384" r="4"/><circle cx="190" cy="391" r="4"/></g>
+<g stroke="#e1edc9" stroke-width="3" stroke-linecap="round"><path d="m221 258 42 24m-42 51 42 24m-42 51 42 24"/></g>
+<path d="m449 237 35-20m-35 95 35-20m-35 95 35-20" stroke="#183e31" stroke-width="5" stroke-linecap="round"/>
+<g transform="translate(42 213)"><rect width="110" height="39" rx="9" fill="#fff" stroke="#d1ddc7"/><circle cx="19" cy="19" r="5" fill="#76a761"/><text x="34" y="24" font-size="13" font-family="Arial" fill="#345a43">Nginx</text></g>
+<g transform="translate(429 98)"><rect width="116" height="39" rx="9" fill="#fff" stroke="#d1ddc7"/><path d="M15 15h5v5h-5zm7 0h5v5h-5zm0-7h5v5h-5z" fill="#689665"/><text x="37" y="24" font-size="13" font-family="Arial" fill="#345a43">Docker</text></g>
+<g transform="translate(416 440)"><rect width="132" height="39" rx="9" fill="#fff" stroke="#d1ddc7"/><path d="M16 14h14v15H16z" fill="#a8c781"/><path d="M14 12h18v5H14z" fill="#5d8e54"/><text x="41" y="24" font-size="13" font-family="Arial" fill="#345a43">S3 storage</text></g>
+<circle cx="107" cy="357" r="7" fill="#a8c781"/><circle cx="536" cy="287" r="5" fill="#43775a"/><path d="M470 62v14m-7-7h14M91 126v12m-6-6h12" stroke="#8ca67c" stroke-width="2"/>
+</svg>
