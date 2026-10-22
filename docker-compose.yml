@@ -48,6 +48,9 @@ services:
       DB_USER: "root"
       DB_PASSWORD: "root"
       DB_NAME: "studentdb"
+    depends_on:
+      relational-database-server:
+        condition: service_healthy
     networks:
       - cloud-net
     restart: unless-stopped
@@ -59,6 +62,12 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: minicloud
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 6
     volumes:
       - ./relational-database-server/init:/docker-entrypoint-initdb.d:ro
       - mariadb_data:/var/lib/mysql
