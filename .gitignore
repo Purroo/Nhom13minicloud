@@ -7,8 +7,12 @@ artifacts/
 node_modules/
 
 # Web-server - Object server ignore
-README.md
+README - Web-Object.md
 tests
 package-lock.json
 package.json
 scripts
+
+# App/Database local tooling, temporary identity provider and test evidence
+/.local-app-database/
+README - App-Database.md
