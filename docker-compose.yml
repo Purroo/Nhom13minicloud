@@ -122,6 +122,14 @@ services:
     container_name: internal-dns-server
     ports:
       - "1053:53/udp"
+    # Mount the Git-managed zone files explicitly. The BIND base image declares
+    # /etc/bind as a volume, so an old anonymous volume can otherwise mask the
+    # files copied by the Dockerfile with empty files.
+    volumes:
+      - ./internal-dns-server/named.conf:/etc/bind/named.conf:ro
+      - ./internal-dns-server/named.conf.options:/etc/bind/named.conf.options:ro
+      - ./internal-dns-server/named.conf.local:/etc/bind/named.conf.local:ro
+      - ./internal-dns-server/db.cloud.local:/etc/bind/db.cloud.local:ro
     networks:
       - cloud-net
     restart: unless-stopped
@@ -156,6 +164,11 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      # Tự động nạp datasource Prometheus (URL bắt buộc) và dashboard "System Health of Nhom13".
+      - ./monitoring-grafana-dashboard-server/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring-grafana-dashboard-server/system-health-dashboard.json:/etc/grafana/dashboards/system-health-dashboard.json:ro
+      # Dashboard "Node Exporter Full" (mục 1.3) được provision tự động từ file.
+      - ./monitoring-grafana-dashboard-server/dashboards:/etc/grafana/dashboards-node-exporter:ro
     networks:
       - cloud-net
     restart: unless-stopped

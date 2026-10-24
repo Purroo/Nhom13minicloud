@@ -10,6 +10,14 @@ server {
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy strict-origin-when-cross-origin always;
 
+    # Mở rộng 7: endpoint /metrics để Prometheus scrape web-frontend-server.
+    # File tĩnh đúng định dạng exposition của Prometheus để target 'web' ở trạng thái UP.
+    location = /metrics {
+        default_type text/plain;
+        access_log off;
+        try_files /metrics.txt =503;
+    }
+
     location / {
         try_files $uri $uri/ =404;
     }
