@@ -1,0 +1,59 @@
+{
+  "realm": "realm_nhom13",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "accessTokenLifespan": 1800,
+  "clients": [
+    {
+      "clientId": "flask-app",
+      "name": "MyMiniCloud Flask App",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost:8085/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "protocolMappers": [
+        {
+          "name": "flask-app-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "flask-app",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "sv01",
+      "enabled": true,
+      "emailVerified": true,
+      "requiredActions": [],
+      "firstName": "Sinh",
+      "lastName": "Vien01",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Sv01Demo@123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-realm_nhom13"
+      ]
+    }
+  ]
+}

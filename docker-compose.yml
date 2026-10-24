@@ -5,6 +5,7 @@ networks:
 volumes:
   mariadb_data:
   grafana_data:
+  keycloak_data:
 
 services:
   # 1A. WEB FRONTEND SERVER 1 (Chính - Có alias web-frontend-server1 cho Load Balancing)
@@ -79,9 +80,9 @@ services:
 
   # 4. AUTHENTICATION IDENTITY SERVER
   authentication-identity-server:
-    image: quay.io/keycloak/keycloak:latest
+    build: ./authentication-identity-server
+    image: nhom13minicloud/keycloak:dev
     container_name: authentication-identity-server
-    command: ["start-dev"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -89,6 +90,8 @@ services:
       KC_HTTP_ENABLED: "true"
     ports:
       - "8081:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
     networks:
       - cloud-net
     restart: unless-stopped
@@ -114,14 +117,11 @@ services:
 
   # 6. INTERNAL DNS SERVER
   internal-dns-server:
-    image: internetsystemsconsortium/bind9:9.18
+    build: ./internal-dns-server
+    image: nhom13minicloud/bind9:dev
     container_name: internal-dns-server
     ports:
       - "1053:53/udp"
-    volumes:
-      - ./internal-dns-server/named.conf.options:/etc/bind/named.conf.options:ro
-      - ./internal-dns-server/named.conf.local:/etc/bind/named.conf.local:ro
-      - ./internal-dns-server/db.cloud.local:/etc/bind/db.cloud.local:ro
     networks:
       - cloud-net
     restart: unless-stopped
