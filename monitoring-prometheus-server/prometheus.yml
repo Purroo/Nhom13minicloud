@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Mục 1.2 (Cơ bản): thu thập metric từ Node Exporter
+  - job_name: 'node'
+    static_configs:
+      - targets: ['monitoring-node-exporter-server:9100']
+
+  # Mở rộng 7: giám sát chính web-frontend-server
+  - job_name: 'web'
+    static_configs:
+      - targets: ['web-frontend-server:80']

@@ -1,6 +1,7 @@
 """MyMiniCloud lab API: JSON students, MariaDB students and OIDC validation."""
 from __future__ import annotations
 
+import fnmatch
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,30 @@ import requests
 ISSUER = os.getenv(
     "OIDC_ISSUER",
     "http://authentication-identity-server:8080/realms/realm_nhom13",
+)
+REALM = os.getenv("OIDC_REALM", "realm_nhom13")
+# Keycloak sinh "iss" theo URL mà client dùng để lấy token, nên cùng một realm có thể
+# xuất hiện dưới nhiều hostname (nội bộ Docker, localhost qua gateway, hay Public IP của EC2).
+# Chữ ký token đã được xác minh bằng JWKS lấy từ issuer nội bộ (đáng tin cậy), nên phần
+# "iss" chỉ cần khớp realm và thuộc danh sách host được phép.
+ISSUER_ALIASES = tuple(
+    item.strip()
+    for item in os.getenv(
+        "OIDC_ISSUER_ALIASES",
+        "http://authentication-identity-server:8081/realms/realm_nhom13,"
+        "http://localhost:8081/realms/realm_nhom13,"
+        "http://localhost/realms/realm_nhom13",
+    ).split(",")
+    if item.strip()
+)
+# Host được phép xuất hiện trong "iss" (hỗ trợ ký tự đại diện, ví dụ "*.example.com").
+ISSUER_HOST_ALLOWLIST = tuple(
+    item.strip().lower()
+    for item in os.getenv(
+        "OIDC_ISSUER_HOST_ALLOWLIST",
+        "authentication-identity-server,localhost,127.0.0.1,keycloak",
+    ).split(",")
+    if item.strip()
 )
 AUDIENCE = os.getenv("OIDC_AUDIENCE", "flask-app")
 JWKS_URL = f"{ISSUER.rstrip('/')}/protocol/openid-connect/certs"
@@ -145,6 +170,33 @@ def unauthorized(message):
     return response
 
 
+def issuer_accepted(issuer):
+    """Chấp nhận "iss" của cùng realm khi host nằm trong danh sách cho phép.
+
+    Chữ ký token đã được xác minh bằng JWKS lấy từ issuer nội bộ (nội bộ Docker
+    là đường tin cậy), nên phần kiểm tra này chỉ chống việc dùng nhầm realm/token
+    từ một nguồn khác chứ không phải cơ chế chống giả mạo chính.
+    """
+    if not isinstance(issuer, str) or not issuer:
+        return False
+    if issuer in (ISSUER,) + ISSUER_ALIASES:
+        return True
+    # Chấp nhận mọi cổng của host hợp lệ, ví dụ http://<public-ip>/realms/realm_nhom13.
+    for prefix in ("http://", "https://"):
+        if not issuer.startswith(prefix):
+            continue
+        remainder = issuer[len(prefix) :]
+        host = remainder.split("/", 1)[0].split("@")[-1]
+        hostname = host.rsplit(":", 1)[0] if host.count(":") == 1 else host
+        hostname = hostname.lower()
+        if not hostname:
+            continue
+        for allowed in ISSUER_HOST_ALLOWLIST:
+            if hostname == allowed or fnmatch.fnmatch(hostname, allowed):
+                return issuer.rstrip("/").endswith("/realms/" + REALM)
+    return False
+
+
 @app.get("/secure")
 def secure():
     authorization = request.headers.get("Authorization", "").split()
@@ -157,14 +209,21 @@ def secure():
             token,
             key,
             algorithms=["RS256"],
-            issuer=ISSUER,
             audience=AUDIENCE,
-            options={"require_exp": True, "require_iss": True, "require_aud": True},
+            options={
+                "require_exp": True,
+                "require_iss": True,
+                "require_aud": True,
+                "verify_iss": False,
+            },
         )
     except IdentityUnavailable:
         app.logger.error("Identity provider signing keys are unavailable")
         return jsonify(error="Identity provider unavailable"), 503
     except (JWTError, ValueError, TypeError, KeyError):
+        return unauthorized("Invalid Bearer token")
+    # Kiểm tra issuer thủ công để chấp nhận nhiều hostname tương đương của cùng realm.
+    if not issuer_accepted(payload.get("iss")):
         return unauthorized("Invalid Bearer token")
     return jsonify(
         message="Secure resource OK",

@@ -1,0 +1,25 @@
+apiVersion: 1
+
+providers:
+  - name: 'Nhom13 dashboards'
+    orgId: 1
+    folder: 'MyMiniCloud'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false
+
+  # Dashboard "Node Exporter Full" (mục 1.3 của đề bài).
+  - name: 'Nhom13 Node Exporter dashboards'
+    orgId: 1
+    folder: 'MyMiniCloud'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards-node-exporter
+      foldersFromFilesStructure: false
