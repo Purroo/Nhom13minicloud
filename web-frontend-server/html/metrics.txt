@@ -1,0 +1,6 @@
+# HELP nginx_up Whether the MyMiniCloud web frontend server is reachable.
+# TYPE nginx_up gauge
+nginx_up 1
+# HELP nginx_info Static build information of the MyMiniCloud web frontend.
+# TYPE nginx_info gauge
+nginx_info{server="web-frontend-server"} 1
