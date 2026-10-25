@@ -131,3 +131,33 @@ Xác nhận BIND9 trả lời đúng cho truy vấn phát sinh **trong** Docker 
 
 - [ ] Kiểm thử/triển khai trên AWS EC2 — bỏ qua theo yêu cầu người dùng.
 - [ ] Ảnh chụp màn hình đưa vào báo cáo — các lệnh và kết quả ở mục 4 có thể dùng làm log thay thế hoặc tự chụp lại.
+
+## 7. Mở rộng 6 — kết quả thực thi (25/10/2026)
+
+Ba bản ghi `app-backend`, `minio`, `keycloak` đã có sẵn trong zone trước khi thực hiện mở rộng. Để chứng minh quy trình thêm bản ghi, đã dùng một bản ghi tạm `demo-extend` rồi gỡ đi. Kế hoạch: `internal-dns-server/plan_extend_6.md`.
+
+| Bước | Kết quả |
+|---|---|
+| `demo-extend.cloud.local` trước khi thêm | `NXDOMAIN` |
+| Thêm `demo-extend IN A 10.10.10.99`, serial `2026102401` thành `2026102402`, `named-checkzone`, restart | Healthy; `demo-extend` ra `10.10.10.99`; `app-backend`, `minio`, `keycloak` giữ `10.10.10.20/30/40` |
+| Gỡ `demo-extend`, serial thành `2026102403`, `named-checkzone`, restart | Healthy; `demo-extend` trả `NXDOMAIN`; 5 bản ghi chuẩn đúng |
+
+Trạng thái cuối: `db.cloud.local` chỉ khác bản gốc ở SOA serial (`2026102403`).
+
+### Caching
+
+- Tên ngoài (`example.com`, qua `recursion yes`): TTL giảm dần `165, 161, 157` giữa các lần hỏi, tức câu trả lời lấy từ cache của BIND9.
+- Tên trong zone: có cờ `aa` (authoritative), TTL luôn `3600` (từ `$TTL 1H`), vì BIND9 là nguồn gốc dữ liệu chứ không phải cache. Client hoặc resolver trung gian mới cache tên này tối đa 1 giờ.
+- Tên không tồn tại: BIND9 trả `NXDOMAIN` kèm SOA; thời gian cache âm theo trường cuối của SOA (`1H`).
+- Khi đo cache, nếu lọc kết quả `dig +noall +answer` bằng `head -1` thì sẽ ra rỗng, vì dòng đầu tiên `dig` in ra là dòng trống. Dùng `grep -E "IN\s+A"` để lọc. BIND9 vẫn trả `NOERROR` kèm đủ 2 bản ghi A ngay sau restart.
+- Log BIND9 có nhiều dòng `network unreachable` tới địa chỉ IPv6 (mức `info`) vì Docker không có route IPv6. Chỉ là nhiễu trong log: truy vấn đệ quy vẫn thành công và không ảnh hưởng zone `cloud.local`.
+
+### Container dùng DNS nội bộ để gọi nhau
+
+| Cách | Kết quả |
+|---|---|
+| `dig @internal-dns-server app-backend.cloud.local` từ container trong `cloud-net` | `10.10.10.20` |
+| Container chạy với `--dns <IP BIND9>` | Phân giải được `app-backend.cloud.local` (`10.10.10.20`), `minio.cloud.local` (`10.10.10.30`) và cả tên service Docker (`authentication-identity-server` ra `172.19.0.5`) |
+| `application-backend-server` (DNS mặc định `127.0.0.11`) phân giải `app-backend.cloud.local` | Lỗi `Try again`, đúng thiết kế: DNS nhúng Docker không biết zone `cloud.local` |
+
+Muốn service thật dùng BIND9 cần khai báo `dns:` trong Compose trỏ tới IP của BIND9, nhưng IP đó do Docker cấp và có thể đổi. Chưa làm vì ảnh hưởng backend, gateway và Keycloak, cần nhóm đồng ý.
