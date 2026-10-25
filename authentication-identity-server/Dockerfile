@@ -4,13 +4,11 @@ FROM quay.io/keycloak/keycloak:26.4.0
 # --import-realm quét các file JSON trong thư mục import mặc định.
 COPY realm-export.json /opt/keycloak/data/import/realm-export.json
 
-# Cố định hostname để claim "iss" của token luôn là
-# http://authentication-identity-server:8080/realms/realm_nhom13,
-# bất kể client gọi qua localhost:8081 (Postman/trình duyệt) hay qua tên
-# service nội bộ. Nhờ đó application-backend-server (OIDC_ISSUER) luôn khớp.
-ENV KC_HOSTNAME=http://authentication-identity-server:8080
-# Admin Console vẫn truy cập được từ máy host qua localhost:8081.
-ENV KC_HOSTNAME_ADMIN=http://localhost:8081
+# Không đặt KC_HOSTNAME: Keycloak suy ra hostname từ request (KC_HOSTNAME_STRICT=false
+# trong docker-compose.yml). Nếu cố định sang tên service nội bộ, trình duyệt sẽ bị
+# chuyển tới http://authentication-identity-server:8080 (không phân giải được từ máy
+# host) và Admin Console không đăng nhập được. Claim "iss" nhiều dạng được
+# application-backend-server chấp nhận qua OIDC_ISSUER_ALIASES / ISSUER_HOST_ALLOWLIST.
 
 # Biến môi trường admin bootstrap (chỉ dùng cho demo local, không dùng
 # cho production) được đặt ở docker-compose.yml, không hardcode ở đây.
