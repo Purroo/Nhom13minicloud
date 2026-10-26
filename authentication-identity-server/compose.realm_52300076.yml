@@ -1,0 +1,12 @@
+# Override Compose: trỏ application-backend-server sang realm_52300076 (dùng khi demo Mở rộng 4).
+# Không dùng thì backend vẫn chạy với realm_nhom13 theo docker-compose.yml.
+#
+# Bật:  docker compose -f docker-compose.yml -f authentication-identity-server/compose.realm_52300076.yml up -d --no-deps application-backend-server
+# Tắt:  docker compose up -d --no-deps application-backend-server
+services:
+  application-backend-server:
+    environment:
+      OIDC_ISSUER: "http://authentication-identity-server:8080/realms/realm_52300076"
+      OIDC_REALM: "realm_52300076"
+      OIDC_AUDIENCE: "flask-app"
+      OIDC_ISSUER_ALIASES: "http://authentication-identity-server:8081/realms/realm_52300076,http://localhost:8081/realms/realm_52300076,http://localhost/realms/realm_52300076"

@@ -3,6 +3,8 @@ FROM quay.io/keycloak/keycloak:26.4.0
 # Realm/Client/User được provision tự động khi Keycloak khởi động, nhờ
 # --import-realm quét các file JSON trong thư mục import mặc định.
 COPY realm-export.json /opt/keycloak/data/import/realm-export.json
+# Realm riêng cho Mở rộng 4 (sv01, sv02, client flask-app), tách biệt với realm_nhom13.
+COPY realm_52300076.json /opt/keycloak/data/import/realm_52300076.json
 
 # Không đặt KC_HOSTNAME: Keycloak suy ra hostname từ request (KC_HOSTNAME_STRICT=false
 # trong docker-compose.yml). Nếu cố định sang tên service nội bộ, trình duyệt sẽ bị
