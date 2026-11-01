@@ -106,7 +106,22 @@ signing_keys = SigningKeys()
 
 @app.get("/hello")
 def hello():
-    return jsonify(message="Hello from App Server!")
+    payload = {"message": "Hello from App Server!"}
+    if prefers_html():
+        response = make_response(render_template("hello.html", **payload))
+    else:
+        response = jsonify(payload)
+    response.vary.add("Accept")
+    return response
+
+
+def prefers_html():
+    """Keep JSON as the default, including for clients accepting any format."""
+    accept = request.accept_mimetypes
+    return (
+        request.args.get("format") != "json"
+        and accept["text/html"] > accept["application/json"]
+    )
 
 
 @app.get("/student")
@@ -166,12 +181,7 @@ def students_db():
 def student_response(students=None, *, error=None, status=200):
     """Render browser requests while preserving the API's default JSON contract."""
     payload = {"error": error} if error else students
-    accept = request.accept_mimetypes
-    wants_html = (
-        request.args.get("format") != "json"
-        and accept["text/html"] > accept["application/json"]
-    )
-    if wants_html:
+    if prefers_html():
         from_database = request.endpoint == "students_db"
         response = make_response(render_template(
             "students.html",
