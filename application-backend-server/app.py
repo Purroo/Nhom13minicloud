@@ -8,7 +8,7 @@ from pathlib import Path
 import threading
 import time
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, make_response, render_template, request
 from jose import JWTError, jwt
 import pymysql
 import requests
@@ -130,8 +130,8 @@ def student():
             raise ValueError("Duplicate student ids")
     except (OSError, UnicodeError, ValueError):
         app.logger.error("Student JSON data is unavailable or invalid")
-        return jsonify(error="Student data unavailable"), 500
-    return jsonify(students)
+        return student_response(error="Student data unavailable", status=500)
+    return student_response(students)
 
 
 @app.get("/students-db")
@@ -157,10 +157,34 @@ def students_db():
         for row in students:
             if row["dob"] is not None:
                 row["dob"] = row["dob"].isoformat()
-        return jsonify(students)
+        return student_response(students)
     except pymysql.MySQLError:
         app.logger.error("Student database is unavailable")
-        return jsonify(error="Database unavailable"), 503
+        return student_response(error="Database unavailable", status=503)
+
+
+def student_response(students=None, *, error=None, status=200):
+    """Render browser requests while preserving the API's default JSON contract."""
+    payload = {"error": error} if error else students
+    accept = request.accept_mimetypes
+    wants_html = (
+        request.args.get("format") != "json"
+        and accept["text/html"] > accept["application/json"]
+    )
+    if wants_html:
+        from_database = request.endpoint == "students_db"
+        response = make_response(render_template(
+            "students.html",
+            students=students or [],
+            from_database=from_database,
+            error=error,
+            status=status,
+            raw_json=json.dumps(payload, ensure_ascii=False, indent=2),
+        ), status)
+    else:
+        response = make_response(jsonify(payload), status)
+    response.vary.add("Accept")
+    return response
 
 
 def unauthorized(message):

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#146950">
+  <title>Danh sách sinh viên · MyMiniCloud</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/style.css?v=20261021-fonts">
+  <style>
+    /* Shared blog palette; base styles also work on the standalone API port. */
+    :root { --paper:#f7f8f2; --ink:#183a36; --muted:#60746d; --green:#146950; --lime:#d9eb9c; --line:#dce2d8; --sans:'Noto Sans','Segoe UI',Arial,sans-serif; --serif:'Noto Serif',Georgia,serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.65 var(--sans); }
+    a { color:inherit; text-decoration:none; }
+    a:hover { color:var(--green); }
+    :focus-visible { outline:3px solid #a57630; outline-offset:4px; }
+    .data-shell { width:min(1100px,calc(100% - 64px)); margin:auto; }
+    .data-header { border-bottom:1px solid var(--line); }
+    .data-header-inner { min-height:85px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+    .data-brand { display:inline-flex; align-items:center; gap:10px; font-size:23px; font-weight:750; letter-spacing:-1px; }
+    .data-brand svg { width:35px; height:35px; color:var(--green); }
+    .data-brand span span { font-weight:400; }
+    .data-back { font-size:13px; }
+    .data-main { padding-top:52px; padding-bottom:64px; min-height:calc(100vh - 168px); }
+    .data-kicker { margin:0 0 16px; display:flex; align-items:center; gap:9px; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+    .data-kicker::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--green); }
+    .data-heading { display:flex; justify-content:space-between; align-items:end; gap:24px; margin-bottom:32px; }
+    .data-heading h1 { margin:0 0 15px; font:400 clamp(32px,4.5vw,49px)/1.2 var(--serif); letter-spacing:-1.5px; }
+    .data-heading h1 em { color:var(--green); font-weight:400; }
+    .data-heading p { margin:0; color:var(--muted); max-width:590px; }
+    .data-count { flex:none; border-left:1px solid var(--line); padding-left:28px; }
+    .data-count strong { display:block; font:400 40px/1.2 var(--serif); color:var(--green); }
+    .data-count span { font-size:12px; color:var(--muted); }
+    .data-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:22px; }
+    .data-tabs { display:flex; flex-wrap:wrap; gap:5px; padding:5px; background:#e9eedf; border:1px solid var(--line); border-radius:8px; }
+    .data-tabs a { padding:9px 18px; font-size:13px; border-radius:5px; }
+    .data-tabs a[aria-current="page"] { background:var(--ink); color:white; }
+    .data-actions { display:flex; align-items:center; gap:18px; font-size:12px; }
+    .data-actions a:hover,.data-back:hover { text-decoration:underline; text-underline-offset:4px; }
+    .data-card { background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+    .data-card-head { padding:20px 25px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--line); }
+    .data-card-head h2 { margin:0; font-size:15px; font-weight:650; }
+    .data-source { font-size:11px; color:var(--green); background:#edf3e7; padding:4px 10px; border-radius:4px; }
+    .data-scroll { overflow-x:auto; }
+    .data-table { width:100%; border-collapse:collapse; text-align:left; font-size:14px; }
+    .data-table caption { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+    .data-table th,.data-table td { padding:18px 25px; border-bottom:1px solid #edf0e9; vertical-align:middle; }
+    .data-table thead th { background:#f9faf6; color:var(--muted); font-size:11px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; white-space:nowrap; }
+    .data-table tbody tr:last-child > * { border-bottom:0; }
+    .data-table tbody tr:hover { background:#f7f9f1; }
+    .data-table tbody th { font-weight:600; min-width:210px; }
+    .data-id { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+    .data-nowrap { white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .data-gpa { display:inline-block; background:var(--lime); padding:3px 11px; border-radius:5px; font-size:12px; font-weight:650; }
+    .data-note { margin:17px 0 25px; color:var(--muted); font-size:12px; }
+    .data-raw { border-top:1px solid var(--line); padding-top:20px; }
+    .data-raw summary { cursor:pointer; font-size:13px; width:fit-content; }
+    .data-raw pre { margin:16px 0 0; padding:24px; background:#163a32; color:#e5efdd; border-radius:8px; overflow:auto; font-size:12px; line-height:1.8; max-height:460px; }
+    .data-empty { padding:42px 25px; text-align:center; }
+    .data-empty h2 { font:400 26px/1.3 var(--serif); margin:0 0 12px; }
+    .data-empty p { color:var(--muted); margin:0; }
+    .data-retry { display:inline-block; margin-top:20px; padding:9px 20px; background:var(--green); color:white; border-radius:5px; }
+    .data-retry:hover { background:var(--ink); color:white; }
+    .data-footer { border-top:1px solid var(--line); padding:25px 0; color:var(--muted); font-size:11px; }
+    .data-footer .data-shell { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    @media(max-width:640px) {
+      .data-shell { width:calc(100% - 32px); }
+      .data-header-inner { min-height:73px; gap:12px; }
+      .data-brand { font-size:20px; gap:6px; }
+      .data-brand svg { width:29px; }
+      .data-back { font-size:11px; }
+      .data-main { padding-top:32px; padding-bottom:40px; }
+      .data-heading { align-items:start; flex-direction:column; gap:20px; }
+      .data-count { display:flex; align-items:baseline; gap:9px; border:0; padding:0; }
+      .data-count strong { font-size:28px; }
+      .data-heading p { font-size:14px; }
+      .data-table th,.data-table td { padding:16px; }
+      .data-card-head { padding:16px; }
+      .data-tabs a { padding:8px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="data-header">
+    <div class="data-shell data-header-inner">
+      <a class="data-brand" href="/" aria-label="MyMiniCloud — Trang chủ">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M10 29h21a7 7 0 0 0 0-14h-1A11 11 0 0 0 9 13a8 8 0 0 0 1 16Z" stroke="currentColor" stroke-width="2.3"/><path d="m15 21 5 4 6-7" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>MyMini<span>Cloud</span></span>
+      </a>
+      <a class="data-back" href="/blog/">Về trang blog <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main class="data-shell data-main">
+    <p class="data-kicker">Nhóm 13 · Góc dữ liệu</p>
+    <div class="data-heading">
+      <div>
+        <h1>Danh sách <em>sinh viên.</em></h1>
+        <p>{{ 'Thông tin sinh viên được đọc trực tiếp từ cơ sở dữ liệu.' if from_database else 'Một góc nhìn gọn gàng về danh sách sinh viên từ tệp JSON.' }}</p>
+      </div>
+      {% if not error %}<div class="data-count"><strong>{{ students|length }}</strong><span>sinh viên</span></div>{% endif %}
+    </div>
+    <div class="data-toolbar">
+      <nav class="data-tabs" aria-label="Nguồn dữ liệu">
+        <a href="/api/student"{% if not from_database %} aria-current="page"{% endif %}>Tệp JSON</a>
+        <a href="/api/students-db"{% if from_database %} aria-current="page"{% endif %}>Cơ sở dữ liệu</a>
+      </nav>
+      <div class="data-actions"><a href="?">Làm mới <span aria-hidden="true">↻</span></a><a href="?format=json">Mở JSON gốc <span aria-hidden="true">↗</span></a></div>
+    </div>
+    <section class="data-card" aria-labelledby="list-heading">
+      <div class="data-card-head"><h2 id="list-heading">{{ 'Sinh viên từ cơ sở dữ liệu' if from_database else 'Sinh viên từ tệp JSON' }}</h2><span class="data-source">{{ 'MariaDB' if from_database else 'JSON' }}</span></div>
+      {% if error %}
+      <div class="data-empty" role="alert"><h2>Chưa thể tải dữ liệu</h2><p>{{ 'Cơ sở dữ liệu tạm thời không khả dụng.' if from_database else 'Tệp dữ liệu sinh viên tạm thời không khả dụng.' }} Vui lòng thử lại sau.</p><a class="data-retry" href="?">Thử lại</a></div>
+      {% elif not students %}
+      <div class="data-empty"><h2>Chưa có sinh viên</h2><p>Danh sách sẽ xuất hiện tại đây khi có dữ liệu.</p></div>
+      {% else %}
+      <div class="data-scroll" role="region" aria-label="Bảng sinh viên, cuộn ngang trên màn hình nhỏ" tabindex="0">
+        <table class="data-table">
+          <caption>Danh sách {{ students|length }} sinh viên từ {{ 'cơ sở dữ liệu' if from_database else 'tệp JSON' }}</caption>
+          <thead><tr><th scope="col">ID</th>{% if from_database %}<th scope="col">Mã sinh viên</th>{% endif %}<th scope="col">Họ và tên</th>{% if from_database %}<th scope="col">Ngày sinh</th>{% endif %}<th scope="col">Ngành học</th>{% if not from_database %}<th scope="col">GPA / 4.0</th>{% endif %}</tr></thead>
+          <tbody>
+            {% for row in students %}
+            <tr>
+              <td class="data-id">{{ row.id }}</td>
+              {% if from_database %}<td class="data-nowrap">{{ row.student_id or '—' }}</td>{% endif %}
+              <th scope="row">{{ (row.fullname if from_database else row.name) or '—' }}</th>
+              {% if from_database %}<td class="data-nowrap">{% if row.dob %}<time datetime="{{ row.dob }}">{{ row.dob[8:10] }}/{{ row.dob[5:7] }}/{{ row.dob[:4] }}</time>{% else %}—{% endif %}</td>{% endif %}
+              <td>{{ row.major or '—' }}</td>
+              {% if not from_database %}<td><span class="data-gpa">{{ '%.2f'|format(row.gpa) }}</span></td>{% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+    <p class="data-note">Hai nguồn dữ liệu độc lập, phục vụ thực hành trong dự án MyMiniCloud.</p>
+    <details class="data-raw"><summary>Xem dữ liệu JSON{% if error %} · HTTP {{ status }}{% endif %}</summary><pre><code>{{ raw_json }}</code></pre></details>
+  </main>
+  <footer class="data-footer"><div class="data-shell"><span>© 2026 MyMiniCloud · Nhóm 13</span><span>Những thành phần nhỏ. Một hệ thống kết nối.</span></div></footer>
+</body>
+</html>
