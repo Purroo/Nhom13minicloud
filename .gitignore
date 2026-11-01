@@ -16,3 +16,5 @@ scripts
 # App/Database local tooling, temporary identity provider and test evidence
 /.local-app-database/
 README - App-Database.md
+outputs/
+README - TEST01.md
